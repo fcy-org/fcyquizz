@@ -66,7 +66,7 @@ export function capitalizeWords(str: string): string {
   return str
     .toLowerCase()
     .replace(/\s+/g, ' ')
-    .trim()
+    .trimStart()
     .replace(/\b\w/g, c => c.toUpperCase());
 }
 
