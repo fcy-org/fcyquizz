@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { type QuizAnswers, type QuizState, INITIAL_ANSWERS } from '@/lib/types';
 import { calculateResult, getQualificationLevel } from '@/lib/scoring';
 import { getUTMParams, generateEventId } from '@/lib/utils';
-import { label, OPERATION_TYPE, SEGMENT, AUDIENCE, REVENUE, WHATSAPP_USAGE, COMMERCIAL_SIZE, CLIENT_SOURCE, MARKETING, TRACK_SALES, REPURCHASE, RESULT } from '@/lib/labels';
+import { label, OPERATION_TYPE, SEGMENT, AUDIENCE, REVENUE, WHATSAPP_USAGE, COMMERCIAL_SIZE, CLIENT_SOURCE, MARKETING, TRACK_SALES, REPURCHASE, CAPACITY, OBJECTIVE, RESULT, ROLE } from '@/lib/labels';
 
 import ProgressBar from './ProgressBar';
 import Logo from './Logo';
@@ -80,7 +80,7 @@ export default function QuizApp() {
       cnpj_limpo: state.answers.cnpjClean,
       cidade: state.answers.city,
       estado: state.answers.state,
-      cargo: state.answers.role === 'outro' ? state.answers.roleOther : state.answers.role,
+      cargo: state.answers.role === 'outro' ? state.answers.roleOther : label(ROLE, state.answers.role),
       // Quiz answers (labels em português)
       tipo_operacao: state.answers.operationType === 'outro' ? state.answers.operationTypeOther : label(OPERATION_TYPE, state.answers.operationType),
       segmento: state.answers.segment === 'outro' ? state.answers.segmentOther : label(SEGMENT, state.answers.segment),
@@ -92,6 +92,8 @@ export default function QuizApp() {
       investimento_marketing: label(MARKETING, state.answers.marketing),
       rastreio_vendas: label(TRACK_SALES, state.answers.trackSales),
       recompra: label(REPURCHASE, state.answers.repurchase),
+      capacidade: label(CAPACITY, state.answers.capacity),
+      objetivo: label(OBJECTIVE, state.answers.objective),
       // Result
       resultado_diagnostico: label(RESULT, result),
       nivel_qualificacao: qualification,

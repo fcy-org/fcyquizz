@@ -1,94 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const CRM_URL = 'https://newtracking-sales-sys.vercel.app/api/public/leads';
-const CRM_KEY = process.env.CRM_LEAD_CAPTURE_KEY || 'xnhk218ib9voq5j7vd4o2uet';
-
-// Google Apps Script executes doPost on the FIRST POST request before returning 302.
-// The redirect URL only serves the response (GET). So we just follow with default redirect
-// and the script will have already run when the 302 was issued.
-async function postToGoogleScript(url: string, body: string): Promise<{ ok: boolean; status: number }> {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body,
-    // redirect: 'follow' (default) — Apps Script runs doPost before the 302, then we follow to get the response
-  });
-  return { ok: res.ok, status: res.status };
-}
+const WEBHOOK_URL =
+  process.env.WEBHOOK_LEADS_URL ||
+  'https://newtracking-sales-sys.vercel.app/api/webhooks/leads/cmpylrvkv000376i6bzhsl1lo';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const timestamp = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-    const payload = { ...body, timestamp };
-    const payloadStr = JSON.stringify(payload);
 
-    const errors: string[] = [];
+    const raw: Record<string, string> = {
+      // ── Campos padrão reconhecidos pelo CRM ──────────────────────────────
+      phone:          body.whatsapp_limpo      ?? '',
+      name:           body.nome_completo       ?? '',
+      email:          body.email               ?? '',
+      document:       body.cnpj_limpo          ?? '',
+      city:           body.cidade              ?? '',
+      state:          body.estado              ?? '',
+      pipeline_stage: body.nivel_qualificacao  ?? '',
 
-    // 1. Google Sheets (via Google Apps Script — redirect manual para preservar POST)
-    const sheetsUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
-    if (sheetsUrl) {
-      try {
-        const result = await postToGoogleScript(sheetsUrl, payloadStr);
-        if (!result.ok) errors.push(`Sheets: ${result.status}`);
-      } catch (e) {
-        errors.push(`Sheets: ${e instanceof Error ? e.message : 'unknown'}`);
-      }
-    }
+      // ── Campos extras → vão automaticamente para Observações no CRM ──────
+      empresa:                  body.empresa                ?? '',
+      cargo:                    body.cargo                  ?? '',
+      resultado_diagnostico:    body.resultado_diagnostico  ?? '',
+      tipo_operacao:            body.tipo_operacao          ?? '',
+      segmento:                 body.segmento               ?? '',
+      publico_atendido:         body.publico_atendido       ?? '',
+      faturamento:              body.faturamento            ?? '',
+      uso_whatsapp:             body.uso_whatsapp           ?? '',
+      equipe_comercial:         body.tamanho_comercial      ?? '',
+      origem_clientes:          body.origem_clientes        ?? '',
+      investimento_marketing:   body.investimento_marketing ?? '',
+      rastreio_vendas:          body.rastreio_vendas        ?? '',
+      recompra:                 body.recompra               ?? '',
+      capacidade_atendimento:   body.capacidade             ?? '',
+      objetivo_principal:       body.objetivo               ?? '',
+      utm_source:               body.utm_source             ?? '',
+      utm_medium:               body.utm_medium             ?? '',
+      utm_campaign:             body.utm_campaign           ?? '',
+      utm_content:              body.utm_content            ?? '',
+      utm_term:                 body.utm_term               ?? '',
+      url_pagina:               body.url_pagina             ?? '',
+      dispositivo:              body.dispositivo            ?? '',
+    };
 
-    // 2. CRM — newtracking-sales-sys
-    try {
-      const crmBody = JSON.stringify({
-        // Dados pessoais e da empresa (formulário final)
-        name: payload.nome_completo || '',
-        first_name: payload.primeiro_nome || '',
-        phone: payload.whatsapp_limpo || '',
-        phone_formatted: payload.whatsapp || '',
-        email: payload.email || '',
-        cnpj: payload.cnpj || '',
-        cnpj_raw: payload.cnpj_limpo || '',
-        empresa: payload.empresa || '',
-        cidade: payload.cidade || '',
-        estado: payload.estado || '',
-        cargo: payload.cargo || '',
-        // Resultado do diagnóstico
-        resultado_diagnostico: payload.resultado_diagnostico || '',
-        nivel_qualificacao: payload.nivel_qualificacao || '',
-        // Rastreamento
-        event_id: payload.event_id || '',
-        fbclid: payload.fbclid || '',
-        fbc: payload.fbc || '',
-        fbp: payload.fbp || '',
-        utm_source: payload.utm_source || '',
-        utm_medium: payload.utm_medium || '',
-        utm_campaign: payload.utm_campaign || '',
-        utm_content: payload.utm_content || '',
-        utm_term: payload.utm_term || '',
-        url_pagina: payload.url_pagina || '',
-        dispositivo: payload.dispositivo || '',
-      });
+    // Remove campos vazios antes de enviar
+    const payload = Object.fromEntries(
+      Object.entries(raw).filter(([, v]) => v.trim() !== '')
+    );
 
-      const res = await fetch(CRM_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-lead-capture-key': CRM_KEY,
-        },
-        body: crmBody,
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => String(res.status));
-        errors.push(`CRM: ${res.status} — ${text.slice(0, 200)}`);
-      }
-    } catch (e) {
-      errors.push(`CRM: ${e instanceof Error ? e.message : 'unknown'}`);
-    }
-
-    return NextResponse.json({
-      success: true,
-      warnings: errors.length > 0 ? errors : undefined,
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => String(res.status));
+      console.error(`Webhook error: ${res.status} — ${text.slice(0, 200)}`);
+    }
+
+    return NextResponse.json({ success: true });
   } catch (e) {
     console.error('Submit error:', e);
     return NextResponse.json({ success: false, error: 'Internal error' }, { status: 500 });

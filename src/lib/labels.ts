@@ -107,8 +107,17 @@ const RESULT: Record<string, string> = {
   scale: 'Pronta para Escalar',
 };
 
+const ROLE: Record<string, string> = {
+  socio_dono: 'Sócio / Dono',
+  diretor: 'Diretor',
+  gerente_comercial: 'Gerente comercial',
+  gerente_marketing: 'Gerente de marketing',
+  coordenador_comercial: 'Coordenador comercial',
+  analista: 'Analista',
+};
+
 function label(map: Record<string, string>, value: string, fallback = value): string {
   return map[value] ?? fallback;
 }
 
-export { label, OPERATION_TYPE, SEGMENT, AUDIENCE, REVENUE, WHATSAPP_USAGE, COMMERCIAL_SIZE, CLIENT_SOURCE, MARKETING, TRACK_SALES, REPURCHASE, CAPACITY, OBJECTIVE, RESULT };
+export { label, OPERATION_TYPE, SEGMENT, AUDIENCE, REVENUE, WHATSAPP_USAGE, COMMERCIAL_SIZE, CLIENT_SOURCE, MARKETING, TRACK_SALES, REPURCHASE, CAPACITY, OBJECTIVE, RESULT, ROLE };
