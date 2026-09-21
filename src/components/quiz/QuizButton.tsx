@@ -33,8 +33,8 @@ export default function QuizButton({
       style={{
         backgroundColor: isPrimary
           ? disabled || loading
-            ? 'rgba(197, 255, 77, 0.4)'
-            : 'var(--color-accent)'
+            ? 'var(--color-button-disabled)'
+            : 'var(--color-button)'
           : 'transparent',
         color: isPrimary ? '#000000' : 'var(--color-text-secondary)',
         border: isPrimary ? 'none' : '1px solid var(--color-border)',
@@ -45,13 +45,13 @@ export default function QuizButton({
         if (!disabled && !loading) {
           const el = e.currentTarget as HTMLButtonElement;
           el.style.transform = 'scale(1.01)';
-          if (isPrimary) el.style.backgroundColor = '#d4ff70';
+          if (isPrimary) el.style.backgroundColor = 'var(--color-button-hover)';
         }
       }}
       onMouseLeave={e => {
         const el = e.currentTarget as HTMLButtonElement;
         el.style.transform = 'scale(1)';
-        if (isPrimary && !disabled && !loading) el.style.backgroundColor = 'var(--color-accent)';
+        if (isPrimary && !disabled && !loading) el.style.backgroundColor = 'var(--color-button)';
       }}
     >
       {loading && <Loader2 size={18} className="animate-spin" />}

@@ -11,8 +11,6 @@ const OPTIONS = [
   { value: 'farmacia_cosmeticos', label: 'Farmácia, cosméticos ou higiene' },
   { value: 'construcao_eletrico', label: 'Construção, material elétrico ou ferragens' },
   { value: 'moda_calcados', label: 'Moda, confecção ou calçados' },
-  { value: 'autopecas', label: 'Autopeças ou peças em geral' },
-  { value: 'maquinas_equipamentos', label: 'Máquinas, equipamentos ou suprimentos' },
   { value: 'outro', label: 'Outro segmento' },
 ];
 

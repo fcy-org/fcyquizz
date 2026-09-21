@@ -33,7 +33,7 @@ const RESULTS: Record<ResultType, ResultConfig> = {
     recommendation:
       "O caminho mais indicado é começar entendendo como sua operação comercial funciona hoje, quais gargalos impedem mais conversões e o que pode ser organizado antes de escalar a geração de demanda.",
     offer: "Análise Comercial com IA",
-    color: "#FF9F4D",
+    color: "var(--color-warning)",
     icon: Target,
   },
   potential: {
@@ -44,7 +44,7 @@ const RESULTS: Record<ResultType, ResultConfig> = {
     recommendation:
       "O caminho mais indicado é analisar o comercial, entender onde as oportunidades se perdem e estruturar um processo mais claro para atendimento, acompanhamento e reativação da base.",
     offer: "Análise Comercial com IA",
-    color: "#4D9FFF",
+    color: "var(--color-info)",
     icon: TrendingUp,
   },
   ready: {
@@ -55,7 +55,7 @@ const RESULTS: Record<ResultType, ResultConfig> = {
     recommendation:
       "O próximo passo é entender como estruturar esse canal com clareza: gerar oportunidades qualificadas, acompanhar o que vira venda e aumentar o valor da base ao longo do tempo.",
     offer: "Assessoria de Crescimento para Distribuidoras e Indústrias",
-    color: "#C5FF4D",
+    color: "var(--color-accent)",
     icon: Zap,
   },
   scale: {
@@ -66,7 +66,7 @@ const RESULTS: Record<ResultType, ResultConfig> = {
     recommendation:
       "O próximo passo é conectar aquisição, comercial, dados e recompra para transformar crescimento em uma fonte recorrente de receita.",
     offer: "Assessoria de Crescimento para Distribuidoras e Indústrias",
-    color: "#C5FF4D",
+    color: "var(--color-accent)",
     icon: TrendingUp,
   },
 };
@@ -103,8 +103,8 @@ export default function Screen18Result({ answers, result }: Props) {
         className="rounded-2xl p-6 relative overflow-hidden"
         style={{
           backgroundColor: "var(--color-surface)",
-          border: `1px solid ${config.color}33`,
-          boxShadow: `0 0 40px ${config.color}15`,
+          border: `1px solid color-mix(in srgb, ${config.color} 20%, transparent)`,
+          boxShadow: `0 0 40px color-mix(in srgb, ${config.color} 8%, transparent)`,
         }}
       >
         {/* Background glow */}
@@ -121,9 +121,9 @@ export default function Screen18Result({ answers, result }: Props) {
         <div
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-4"
           style={{
-            backgroundColor: `${config.color}22`,
+            backgroundColor: `color-mix(in srgb, ${config.color} 13%, transparent)`,
             color: config.color,
-            border: `1px solid ${config.color}44`,
+            border: `1px solid color-mix(in srgb, ${config.color} 27%, transparent)`,
           }}
         >
           <Icon size={12} style={{ color: config.color }} />

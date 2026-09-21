@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { type QuizAnswers } from '@/lib/types';
-import { extractFirstName, validateFullName } from '@/lib/utils';
+import { extractFirstName } from '@/lib/utils';
 import QuizInput from '../QuizInput';
 import QuizButton from '../QuizButton';
 
@@ -27,11 +27,7 @@ export default function Screen1Name({ answers, updateAnswers, next }: Props) {
 
   const handleNext = () => {
     if (!answers.fullName.trim()) {
-      setError('Por favor, informe seu nome completo.');
-      return;
-    }
-    if (!validateFullName(answers.fullName)) {
-      setError('Informe seu nome e sobrenome para continuar.');
+      setError('Por favor, informe seu nome.');
       return;
     }
     next();
@@ -52,8 +48,8 @@ export default function Screen1Name({ answers, updateAnswers, next }: Props) {
       </div>
 
       <QuizInput
-        label="Nome completo"
-        placeholder="Ex: Miguel Sousa"
+        label="Seu nome"
+        placeholder="Ex: Miguel"
         value={answers.fullName}
         onChange={handleChange}
         error={error}

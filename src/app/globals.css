@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: dark;
   --color-bg: #0D0D0D;
   --color-surface: #161616;
   --color-surface-2: #1E1E1E;
@@ -12,6 +13,13 @@
   --color-border: #2A2A2A;
   --color-border-hover: #3A3A3A;
   --color-error: #FF5A5A;
+  --color-accent-contrast: #000000;
+  --color-button: #C5FF4D;
+  --color-button-hover: #D4FF70;
+  --color-button-disabled: rgba(197, 255, 77, 0.4);
+  --color-warning: #FF9F4D;
+  --color-info: #4D9FFF;
+  --quiz-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 24px 80px rgba(0,0,0,0.8);
 }
 
 @theme inline {
@@ -38,9 +46,9 @@ body {
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px #1E1E1E inset !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-  caret-color: #FFFFFF;
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface-2) inset !important;
+  -webkit-text-fill-color: var(--color-text) !important;
+  caret-color: var(--color-text);
 }
 
 ::selection {
@@ -52,6 +60,6 @@ input:-webkit-autofill:focus {
 @media (min-width: 1024px) {
   .quiz-card {
     border: 1px solid var(--color-border);
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 24px 80px rgba(0, 0, 0, 0.8);
+    box-shadow: var(--quiz-shadow);
   }
 }

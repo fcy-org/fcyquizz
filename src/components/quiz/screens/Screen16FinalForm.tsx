@@ -222,7 +222,7 @@ export default function Screen16FinalForm({
               <option
                 key={uf}
                 value={uf}
-                style={{ backgroundColor: "#1E1E1E", color: "#fff" }}
+                style={{ backgroundColor: "var(--color-surface-2)", color: "var(--color-text)" }}
               >
                 {uf}
               </option>
@@ -281,7 +281,7 @@ export default function Screen16FinalForm({
               <option
                 key={r.value}
                 value={r.value}
-                style={{ backgroundColor: "#1E1E1E", color: "#fff" }}
+                style={{ backgroundColor: "var(--color-surface-2)", color: "var(--color-text)" }}
               >
                 {r.label}
               </option>
@@ -338,7 +338,7 @@ export default function Screen16FinalForm({
                   <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
                     <path
                       d="M2 6l3 3 5-5"
-                      stroke="#000"
+                      stroke="var(--color-accent-contrast)"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
