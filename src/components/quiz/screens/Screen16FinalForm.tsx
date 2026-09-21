@@ -4,12 +4,9 @@ import { useState } from "react";
 import { type QuizAnswers } from "@/lib/types";
 import {
   formatWhatsApp,
-  formatCNPJ,
-  validateCNPJ,
   validateEmail,
   validateWhatsApp,
   cleanPhone,
-  cleanCNPJ,
   capitalizeWords,
 } from "@/lib/utils";
 import QuizInput from "../QuizInput";
@@ -67,7 +64,6 @@ interface Errors {
   companyName?: string;
   whatsapp?: string;
   email?: string;
-  cnpj?: string;
   city?: string;
   state?: string;
   role?: string;
@@ -93,8 +89,6 @@ export default function Screen16FinalForm({
     if (!answers.email.trim()) e.email = "Informe seu e-mail.";
     else if (!validateEmail(answers.email))
       e.email = "Formato de e-mail inválido.";
-    if (!answers.cnpj.trim()) e.cnpj = "Informe o CNPJ.";
-    else if (!validateCNPJ(answers.cnpj)) e.cnpj = "CNPJ inválido.";
     if (!answers.city.trim()) e.city = "Informe a cidade.";
     if (!answers.state) e.state = "Selecione o estado.";
     if (!answers.role) e.role = "Selecione seu cargo.";
@@ -176,20 +170,6 @@ export default function Screen16FinalForm({
             setErrors((p) => ({ ...p, email: undefined }));
           }}
           autoComplete="email"
-        />
-
-        {/* CNPJ */}
-        <QuizInput
-          label="CNPJ *"
-          placeholder="00.000.000/0000-00"
-          value={answers.cnpj}
-          error={field("cnpj")}
-          inputMode="numeric"
-          onChange={(e) => {
-            const formatted = formatCNPJ(e.target.value);
-            updateAnswers({ cnpj: formatted, cnpjClean: cleanCNPJ(formatted) });
-            setErrors((p) => ({ ...p, cnpj: undefined }));
-          }}
         />
 
         {/* State */}

@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   },
 };
 
-const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || '844514152034504';
-const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID || 'wqmspwp86u';
+const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || '1014610764961858';
+const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID || 'yjx5j5uhnu';
 
 export default function RootLayout({
   children,

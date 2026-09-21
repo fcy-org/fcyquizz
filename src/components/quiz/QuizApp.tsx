@@ -16,16 +16,15 @@ import Screen2OperationType from './screens/Screen2OperationType';
 import Screen3Segment from './screens/Screen3Segment';
 import Screen5Revenue from './screens/Screen5Revenue';
 import Screen6Info from './screens/Screen6Info';
-import Screen7WhatsApp from './screens/Screen7WhatsApp';
-import Screen8CommercialSize from './screens/Screen8CommercialSize';
 import Screen9ClientSource from './screens/Screen9ClientSource';
 import Screen10Marketing from './screens/Screen10Marketing';
+import ScreenSocialProofBreak from './screens/ScreenSocialProofBreak';
 import Screen14FinalForm from './screens/Screen16FinalForm';
 import Screen15Processing from './screens/Screen17Processing';
 import Screen16Result from './screens/Screen18Result';
 
-// Steps: 0=welcome, 1=name, 2=phone, 3-10=questions/info, 11=form, 12=processing, 13=result
-const PROGRESS_STEPS = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
+// Steps: 0=welcome, 1=name, 2=phone, 3-8=questions/info, 9=social proof break, 10=form, 11=processing, 12=result
+const PROGRESS_STEPS = [1, 2, 3, 4, 5, 7, 8, 10];
 
 export default function QuizApp() {
   const [state, setState] = useState<QuizState>({
@@ -62,7 +61,7 @@ export default function QuizApp() {
     const qualification = getQualificationLevel(result);
 
     setState(prev => ({ ...prev, result, isSubmitting: true }));
-    goTo(12, 1); // show processing screen
+    goTo(11, 1); // show processing screen
 
     // Build submission payload
     const payload = {
@@ -116,11 +115,11 @@ export default function QuizApp() {
     await new Promise(r => setTimeout(r, 2500));
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-    goTo(13, 1);
+    goTo(12, 1);
   }, [state.answers, state.utmParams, goTo]);
 
   // Progress bar calculation
-  const showProgress = state.currentStep >= 1 && state.currentStep <= 11;
+  const showProgress = state.currentStep >= 1 && state.currentStep <= 10;
   const progressCurrent = PROGRESS_STEPS.filter(step => step <= state.currentStep).length;
 
   const variants = {
@@ -145,13 +144,12 @@ export default function QuizApp() {
       case 4: return <Screen3Segment {...props} />;
       case 5: return <Screen5Revenue {...props} />;
       case 6: return <Screen6Info {...props} />;
-      case 7: return <Screen7WhatsApp {...props} />;
-      case 8: return <Screen8CommercialSize {...props} />;
-      case 9: return <Screen9ClientSource {...props} />;
-      case 10: return <Screen10Marketing {...props} />;
-      case 11: return <Screen14FinalForm {...props} onSubmit={submitAndShowResult} />;
-      case 12: return <Screen15Processing firstName={state.answers.firstName} />;
-      case 13: return <Screen16Result answers={state.answers} result={state.result!} />;
+      case 7: return <Screen9ClientSource {...props} />;
+      case 8: return <Screen10Marketing {...props} />;
+      case 9: return <ScreenSocialProofBreak {...props} />;
+      case 10: return <Screen14FinalForm {...props} onSubmit={submitAndShowResult} />;
+      case 11: return <Screen15Processing firstName={state.answers.firstName} />;
+      case 12: return <Screen16Result answers={state.answers} result={state.result!} />;
       default: return null;
     }
   };
@@ -170,7 +168,7 @@ export default function QuizApp() {
         className="quiz-card w-full lg:max-w-2xl flex flex-col flex-1 lg:flex-none lg:rounded-2xl overflow-hidden"
         style={{ backgroundColor: 'var(--color-surface)' }}
       >
-        {/* Header — steps 1-11 */}
+        {/* Header — steps 1-10 */}
         {showProgress && (
           <header className="flex items-center justify-between px-5 pt-5 pb-2">
             <Logo />
