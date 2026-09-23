@@ -1,18 +1,14 @@
 "use client";
 
 import { type QuizAnswers, type ResultType } from "@/lib/types";
-import { buildWhatsAppMessage } from "@/lib/utils";
 import {
-  MessageCircle,
+  CheckCircle2,
   TrendingUp,
   Target,
   Zap,
   ArrowRight,
 } from "lucide-react";
 import Logo from "../Logo";
-
-const WHATSAPP_NUMBER =
-  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5586999999999";
 
 interface ResultConfig {
   badge: string;
@@ -79,17 +75,6 @@ interface Props {
 export default function Screen18Result({ answers, result }: Props) {
   const config = RESULTS[result];
   const Icon = config.icon;
-
-  const waMessage = buildWhatsAppMessage({
-    firstName: answers.firstName,
-    companyName: answers.companyName,
-    result,
-    revenue: answers.revenue,
-    whatsappUsage: answers.whatsappUsage,
-    objective: answers.objective,
-  });
-
-  const waUrl = `https://wa.me/${+558695315620}?text=${encodeURIComponent(waMessage)}`;
 
   return (
     <div className="flex flex-col py-8 pb-12 gap-6">
@@ -199,26 +184,27 @@ export default function Screen18Result({ answers, result }: Props) {
         </div>
       </div>
 
-      {/* WhatsApp CTA */}
-      <a
-        href={waUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-full rounded-xl px-6 py-4 text-base font-semibold flex items-center justify-center gap-3 transition-all duration-200 no-underline"
+      {/* Contact notice */}
+      <div
+        className="w-full rounded-xl px-6 py-4 flex items-center gap-3"
         style={{
-          backgroundColor: "#25D366",
-          color: "#FFFFFF",
+          backgroundColor: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
         }}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.backgroundColor = "#22c35e")
-        }
-        onMouseLeave={(e) =>
-          (e.currentTarget.style.backgroundColor = "#25D366")
-        }
       >
-        <MessageCircle size={20} />
-        Falar com a Fonil pelo WhatsApp
-      </a>
+        <CheckCircle2
+          size={20}
+          style={{ color: "var(--color-accent)" }}
+          className="shrink-0"
+        />
+        <p
+          className="text-sm leading-relaxed"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
+          Recebemos seus dados. Nossa equipe entrará em contato em breve para
+          apresentar os próximos passos.
+        </p>
+      </div>
 
       {/* Footer */}
       <p

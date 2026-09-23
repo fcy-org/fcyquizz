@@ -70,41 +70,6 @@ export function capitalizeWords(str: string): string {
     .replace(/\b\w/g, c => c.toUpperCase());
 }
 
-export function buildWhatsAppMessage(answers: {
-  firstName: string;
-  companyName: string;
-  result: string;
-  revenue: string;
-  whatsappUsage: string;
-  objective: string;
-}): string {
-  const revenueLabels: Record<string, string> = {
-    'up_100k': 'até R$100 mil/mês',
-    '100k_300k': 'entre R$100 mil e R$300 mil/mês',
-    '300k_700k': 'entre R$300 mil e R$700 mil/mês',
-    '700k_1m': 'entre R$700 mil e R$1 milhão/mês',
-    'above_1m': 'acima de R$1 milhão/mês',
-  };
-
-  const objectiveLabels: Record<string, string> = {
-    'new_clients': 'gerar novos clientes todos os meses',
-    'sell_more_base': 'vender mais para a base atual',
-    'new_regions': 'entrar em novas regiões',
-    'organize_commercial': 'organizar o comercial',
-    'new_predictable_channel': 'criar um novo canal previsível de vendas',
-    'all': 'todos os anteriores',
-  };
-
-  const resultLabels: Record<string, string> = {
-    'beginning': 'Começo da Estrutura',
-    'potential': 'Operação com Potencial',
-    'ready': 'Pronta para um Novo Canal',
-    'scale': 'Pronta para Escalar',
-  };
-
-  return `Olá, concluí o diagnóstico da Fonil. Meu resultado foi: ${resultLabels[answers.result] || answers.result}. Minha empresa é ${answers.companyName}, faturamos ${revenueLabels[answers.revenue] || answers.revenue} e meu principal objetivo hoje é ${objectiveLabels[answers.objective] || answers.objective}. Quero entender qual seria o melhor caminho para nossa operação.`;
-}
-
 function getCookie(name: string): string {
   if (typeof document === 'undefined') return '';
   const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
