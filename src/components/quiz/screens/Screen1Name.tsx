@@ -40,10 +40,10 @@ export default function Screen1Name({ answers, updateAnswers, next }: Props) {
           className="text-2xl md:text-3xl font-bold leading-tight"
           style={{ color: 'var(--color-text)' }}
         >
-          Antes de analisarmos sua empresa, me diga seu nome
+          Antes de conhecermos sua empresa, me diga seu nome
         </h2>
         <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-          Vamos usar essa informação apenas para personalizar sua experiência durante o diagnóstico.
+          Vamos usar essa informação apenas para personalizar sua experiência durante a consultoria.
         </p>
       </div>
 
@@ -60,7 +60,7 @@ export default function Screen1Name({ answers, updateAnswers, next }: Props) {
 
       <div className="mt-auto">
         <QuizButton onClick={handleNext} disabled={!answers.fullName.trim()}>
-          Começar análise
+          Começar cadastro
         </QuizButton>
       </div>
     </div>

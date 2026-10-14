@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sendMetaLead } from './meta-conversions';
 
-const WEBHOOK_URL =
-  process.env.WEBHOOK_LEADS_URL ||
-  'https://newtracking-sales-sys.vercel.app/api/webhooks/leads/cmpylrvkv000376i6bzhsl1lo';
+export const runtime = 'nodejs';
 
 // Definida em .env.local / variáveis da hospedagem (a URL contém um token)
 const SUPABASE_WEBHOOK_URL = process.env.WEBHOOK_SUPABASE_URL;
@@ -13,19 +12,43 @@ async function postWebhook(url: string, name: string, payload: Record<string, st
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(15000),
     });
     if (!res.ok) {
-      const text = await res.text().catch(() => String(res.status));
-      console.error(`Webhook ${name} error: ${res.status} — ${text.slice(0, 200)}`);
+      console.error(`Webhook ${name} error: ${res.status}`);
+      return false;
     }
-  } catch (e) {
-    console.error(`Webhook ${name} failed:`, e);
+
+    const result = await res.json().catch(() => null);
+    if (result?.success === false) {
+      console.error(`Webhook ${name} rejected the submission.`);
+      return false;
+    }
+
+    return true;
+  } catch {
+    console.error(`Webhook ${name} request failed.`);
+    return false;
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
+    const webhookUrl = process.env.WEBHOOK_LEADS_URL;
+    if (!webhookUrl) {
+      return NextResponse.json(
+        { success: false, crm_received: false, error: 'CRM is not configured' },
+        { status: 503 },
+      );
+    }
+
     const body = await req.json();
+    if (typeof body.event_id !== 'string' || !body.event_id.trim()) {
+      return NextResponse.json(
+        { success: false, crm_received: false, error: 'Missing event ID' },
+        { status: 400 },
+      );
+    }
 
     const raw: Record<string, string> = {
       // ── Campos padrão reconhecidos pelo CRM ──────────────────────────────
@@ -58,6 +81,10 @@ export async function POST(req: NextRequest) {
       utm_campaign:             body.utm_campaign           ?? '',
       utm_content:              body.utm_content            ?? '',
       utm_term:                 body.utm_term               ?? '',
+      event_id:                 body.event_id,
+      fbclid:                   body.fbclid                 ?? '',
+      fbc:                      body.fbc                    ?? '',
+      fbp:                      body.fbp                    ?? '',
       url_pagina:               body.url_pagina             ?? '',
       dispositivo:              body.dispositivo            ?? '',
     };
@@ -67,13 +94,23 @@ export async function POST(req: NextRequest) {
       Object.entries(raw).filter(([, v]) => v.trim() !== '')
     );
 
-    const targets = [{ name: 'CRM', url: WEBHOOK_URL }];
-    if (SUPABASE_WEBHOOK_URL) targets.push({ name: 'Supabase', url: SUPABASE_WEBHOOK_URL });
-    await Promise.all(targets.map(t => postWebhook(t.url, t.name, payload)));
+    const targets = [{ name: 'CRM', url: webhookUrl }];
+    if (SUPABASE_WEBHOOK_URL && SUPABASE_WEBHOOK_URL !== webhookUrl) {
+      targets.push({ name: 'Supabase', url: SUPABASE_WEBHOOK_URL });
+    }
+    const [crmReceived] = await Promise.all(targets.map(t => postWebhook(t.url, t.name, payload)));
 
-    return NextResponse.json({ success: true });
-  } catch (e) {
-    console.error('Submit error:', e);
-    return NextResponse.json({ success: false, error: 'Internal error' }, { status: 500 });
+    if (!crmReceived) {
+      return NextResponse.json(
+        { success: false, crm_received: false, error: 'CRM submission failed' },
+        { status: 502 },
+      );
+    }
+
+    const metaSent = await sendMetaLead(body, req);
+    return NextResponse.json({ success: true, crm_received: true, meta_sent: metaSent });
+  } catch {
+    console.error('Submit request failed.');
+    return NextResponse.json({ success: false, crm_received: false, error: 'Internal error' }, { status: 500 });
   }
 }

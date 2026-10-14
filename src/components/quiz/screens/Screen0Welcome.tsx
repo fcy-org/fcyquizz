@@ -10,7 +10,13 @@ interface Props {
 
 export default function Screen0Welcome({ onStart }: Props) {
   return (
-    <div className="flex flex-col flex-1 py-8 px-5 md:px-8 relative overflow-hidden min-h-svh lg:min-h-0">
+    <div className="flex flex-col flex-1 pb-8 px-5 md:px-8 relative overflow-hidden min-h-svh lg:min-h-0">
+      <div
+        className="relative z-10 -mx-5 md:-mx-8 py-3 px-5 text-center text-xs md:text-sm font-bold tracking-wider"
+        style={{ backgroundColor: '#B91C1C', color: '#FFFFFF' }}
+      >
+        ÚLTIMAS VAGAS DISPONÍVEIS
+      </div>
       {/* Background elements */}
       <div
         className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-10 pointer-events-none"
@@ -28,7 +34,7 @@ export default function Screen0Welcome({ onStart }: Props) {
       />
 
       {/* Logo */}
-      <div className="flex justify-center mb-auto pt-4">
+      <div className="flex justify-center mb-auto pt-8">
         <Logo size="md" />
       </div>
 
@@ -44,7 +50,7 @@ export default function Screen0Welcome({ onStart }: Props) {
           }}
         >
           <Zap size={12} />
-          Diagnóstico Personalizado
+          Agende sua consultoria gratuita
         </div>
 
         <h1
@@ -58,9 +64,8 @@ export default function Screen0Welcome({ onStart }: Props) {
           className="text-base leading-relaxed max-w-sm"
           style={{ color: "var(--color-text-secondary)" }}
         >
-          Responda algumas perguntas sobre sua operação comercial e receba um
-          diagnóstico sobre o potencial da sua empresa para transformar demanda
-          em receita previsível.
+          Responda algumas perguntas sobre sua Distribuidora/Indústria para
+          agendar sua consultoria gratuita.
         </p>
 
         {/* Features */}
@@ -71,7 +76,7 @@ export default function Screen0Welcome({ onStart }: Props) {
               icon: TrendingUp,
               label: "Mapeamento do potencial de crescimento",
             },
-            { icon: Zap, label: "Diagnóstico personalizado para sua empresa" },
+            { icon: Zap, label: "Consultoria gratuita para sua empresa" },
           ].map(({ icon: Icon, label }) => (
             <div
               key={label}
@@ -100,12 +105,12 @@ export default function Screen0Welcome({ onStart }: Props) {
 
       {/* CTA */}
       <div className="pt-6">
-        <QuizButton onClick={onStart}>Iniciar diagnóstico</QuizButton>
+        <QuizButton onClick={onStart}>Iniciar cadastro</QuizButton>
         <p
           className="text-center text-xs mt-3"
           style={{ color: "var(--color-text-muted)" }}
         >
-          Gratuito · Diagnóstico personalizado
+          Consultoria gratuita · Para distribuidoras e indústrias
         </p>
       </div>
     </div>

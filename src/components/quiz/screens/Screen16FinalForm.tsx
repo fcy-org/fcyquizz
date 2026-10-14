@@ -58,6 +58,7 @@ interface Props {
   next: () => void;
   back: () => void;
   onSubmit: () => void;
+  submitError?: string;
 }
 
 interface Errors {
@@ -75,6 +76,7 @@ export default function Screen16FinalForm({
   answers,
   updateAnswers,
   onSubmit,
+  submitError,
 }: Props) {
   const [errors, setErrors] = useState<Errors>({});
   const [loading, setLoading] = useState(false);
@@ -121,7 +123,7 @@ export default function Screen16FinalForm({
           className="text-2xl md:text-3xl font-bold leading-tight"
           style={{ color: "var(--color-text)" }}
         >
-          Preencha os dados abaixo para liberar seu diagnóstico.
+          Agendar consultoria
         </h2>
       </div>
 
@@ -331,7 +333,7 @@ export default function Screen16FinalForm({
               className="text-sm leading-relaxed"
               style={{ color: "var(--color-text-secondary)" }}
             >
-              Aceito receber meu diagnóstico e autorizo o contato da Fonil com
+              Aceito agendar minha consultoria e autorizo o contato da Fonil com
               base nas informações enviadas.
             </span>
           </label>
@@ -358,8 +360,14 @@ export default function Screen16FinalForm({
         </div>
       </div>
 
+      {submitError && (
+        <p role="alert" className="text-sm" style={{ color: "var(--color-error)" }}>
+          {submitError}
+        </p>
+      )}
+
       <QuizButton onClick={handleSubmit} loading={loading}>
-        Ver meu diagnóstico
+        Agendar consultoria
       </QuizButton>
     </div>
   );

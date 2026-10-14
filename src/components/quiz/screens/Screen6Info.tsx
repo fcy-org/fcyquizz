@@ -53,7 +53,7 @@ export default function Screen6Info({ answers, next }: Props) {
 
       <div className="mt-2">
         <QuizButton onClick={next}>
-          Continuar diagnóstico
+          Continuar cadastro
         </QuizButton>
       </div>
     </div>

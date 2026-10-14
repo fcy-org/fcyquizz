@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { type QuizAnswers, type QuizState, INITIAL_ANSWERS } from '@/lib/types';
 import { calculateResult, getQualificationLevel } from '@/lib/scoring';
 import { getUTMParams, generateEventId } from '@/lib/utils';
+import { submitLead } from '@/lib/lead-submit';
 import { label, OPERATION_TYPE, SEGMENT, AUDIENCE, REVENUE, WHATSAPP_USAGE, COMMERCIAL_SIZE, CLIENT_SOURCE, MARKETING, TRACK_SALES, REPURCHASE, CAPACITY, OBJECTIVE, RESULT, ROLE } from '@/lib/labels';
 
 import ProgressBar from './ProgressBar';
@@ -27,18 +28,16 @@ import Screen16Result from './screens/Screen18Result';
 const PROGRESS_STEPS = [1, 2, 3, 4, 5, 7, 8, 10];
 
 export default function QuizApp() {
-  const [state, setState] = useState<QuizState>({
+  const [state, setState] = useState<QuizState>(() => ({
     currentStep: 0,
     answers: INITIAL_ANSWERS,
     result: null,
     isSubmitting: false,
-    utmParams: {},
-  });
+    utmParams: getUTMParams(),
+  }));
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
-
-  useEffect(() => {
-    setState(prev => ({ ...prev, utmParams: getUTMParams() }));
-  }, []);
+  const [submissionError, setSubmissionError] = useState('');
+  const submitInFlight = useRef(false);
 
   const goTo = useCallback((step: number, dir = 1) => {
     setDirection(dir);
@@ -57,6 +56,10 @@ export default function QuizApp() {
   }, []);
 
   const submitAndShowResult = useCallback(async () => {
+    if (submitInFlight.current) return;
+    submitInFlight.current = true;
+    setSubmissionError('');
+
     const result = calculateResult(state.answers);
     const qualification = getQualificationLevel(result);
 
@@ -96,26 +99,25 @@ export default function QuizApp() {
       // Meta e rastreamento
       event_id: generateEventId(),
       ...state.utmParams,
+      ...getUTMParams(),
       url_pagina: typeof window !== 'undefined' ? window.location.href : '',
       dispositivo: typeof window !== 'undefined' ? (window.innerWidth <= 768 ? 'mobile' : 'desktop') : '',
       navegador: typeof window !== 'undefined' ? navigator.userAgent : '',
     };
 
     try {
-      await fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      await submitLead(payload);
+
+      // Keep the processing screen briefly after the CRM confirms receipt.
+      await new Promise(r => setTimeout(r, 2500));
+      goTo(12, 1);
     } catch {
-      // Fail silently - user still gets their result
+      setSubmissionError('Não foi possível enviar seu cadastro. Por favor, tente novamente.');
+      goTo(10, -1);
+    } finally {
+      submitInFlight.current = false;
+      setState(prev => ({ ...prev, isSubmitting: false }));
     }
-
-    // Simulate 2.5s processing for UX
-    await new Promise(r => setTimeout(r, 2500));
-
-    setState(prev => ({ ...prev, isSubmitting: false }));
-    goTo(12, 1);
   }, [state.answers, state.utmParams, goTo]);
 
   // Progress bar calculation
@@ -147,9 +149,9 @@ export default function QuizApp() {
       case 7: return <Screen9ClientSource {...props} />;
       case 8: return <Screen10Marketing {...props} />;
       case 9: return <ScreenSocialProofBreak {...props} />;
-      case 10: return <Screen14FinalForm {...props} onSubmit={submitAndShowResult} />;
+      case 10: return <Screen14FinalForm {...props} onSubmit={submitAndShowResult} submitError={submissionError} />;
       case 11: return <Screen15Processing firstName={state.answers.firstName} />;
-      case 12: return <Screen16Result answers={state.answers} result={state.result!} />;
+      case 12: return <Screen16Result answers={state.answers} />;
       default: return null;
     }
   };

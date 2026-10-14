@@ -56,10 +56,10 @@ export default function Screen17Processing({ firstName }: Props) {
 
       <div className="flex flex-col gap-2">
         <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
-          Estamos analisando seu cenário, {firstName}.
+          Estamos preparando seu cadastro, {firstName}.
         </h2>
         <p className="text-sm max-w-xs" style={{ color: 'var(--color-text-secondary)' }}>
-          Cruzando suas respostas sobre estrutura comercial, canais atuais, capacidade de atendimento e potencial de crescimento.
+          Organizando suas respostas para que nosso time entre em contato e agende sua consultoria gratuita.
         </p>
       </div>
 
