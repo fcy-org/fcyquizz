@@ -45,12 +45,14 @@ Na hospedagem, configure as mesmas variáveis do ambiente local:
 
 | Variável | Finalidade |
 | --- | --- |
-| `WEBHOOK_LEADS_URL` | URL completa do CRM com o token do webhook. |
+| `WEBHOOK_LEADS_URL` | URL principal do CRM com o token do webhook. Tem prioridade quando configurada. |
 | `META_ACCESS_TOKEN` | Token privado da API de Conversões. |
 | `NEXT_PUBLIC_META_PIXEL_ID` | Mesmo pixel para o navegador e para a API de Conversões. |
 | `META_GRAPH_API_VERSION` | Versão da API Graph, atualmente `v26.0`. |
 | `META_TEST_EVENT_CODE` | Opcional, somente para validar eventos no painel de testes da Meta. |
-| `WEBHOOK_SUPABASE_URL` | Opcional, destino secundário diferente do CRM principal. |
+| `WEBHOOK_SUPABASE_URL` | CRM principal quando `WEBHOOK_LEADS_URL` não estiver configurada; destino secundário quando as duas URLs forem diferentes. |
+
+É necessário configurar pelo menos uma das URLs de webhook. A configuração existente do EasyPanel com apenas `WEBHOOK_SUPABASE_URL` é compatível. `META_ACCESS_TOKEN` ativa os eventos pelo servidor; sua ausência não bloqueia o cadastro no CRM nem o evento do pixel.
 
 Depois de configurar as variáveis na hospedagem, faça um novo build e reinicie o serviço. O ID público do pixel é definido durante o build; os tokens são usados somente no servidor.
 

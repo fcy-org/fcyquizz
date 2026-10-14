@@ -3,9 +3,6 @@ import { sendMetaLead } from './meta-conversions';
 
 export const runtime = 'nodejs';
 
-// Definida em .env.local / variáveis da hospedagem (a URL contém um token)
-const SUPABASE_WEBHOOK_URL = process.env.WEBHOOK_SUPABASE_URL;
-
 async function postWebhook(url: string, name: string, payload: Record<string, string>) {
   try {
     const res = await fetch(url, {
@@ -34,7 +31,8 @@ async function postWebhook(url: string, name: string, payload: Record<string, st
 
 export async function POST(req: NextRequest) {
   try {
-    const webhookUrl = process.env.WEBHOOK_LEADS_URL;
+    const supabaseWebhookUrl = process.env.WEBHOOK_SUPABASE_URL?.trim();
+    const webhookUrl = process.env.WEBHOOK_LEADS_URL?.trim() || supabaseWebhookUrl;
     if (!webhookUrl) {
       return NextResponse.json(
         { success: false, crm_received: false, error: 'CRM is not configured' },
@@ -95,8 +93,8 @@ export async function POST(req: NextRequest) {
     );
 
     const targets = [{ name: 'CRM', url: webhookUrl }];
-    if (SUPABASE_WEBHOOK_URL && SUPABASE_WEBHOOK_URL !== webhookUrl) {
-      targets.push({ name: 'Supabase', url: SUPABASE_WEBHOOK_URL });
+    if (supabaseWebhookUrl && supabaseWebhookUrl !== webhookUrl) {
+      targets.push({ name: 'Supabase', url: supabaseWebhookUrl });
     }
     const [crmReceived] = await Promise.all(targets.map(t => postWebhook(t.url, t.name, payload)));
 

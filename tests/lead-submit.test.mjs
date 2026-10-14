@@ -231,12 +231,48 @@ test('Meta rejection or network failure does not ask the user to resend a saved 
 });
 
 test('Missing CRM configuration blocks both conversion channels and any webhook request', async () => {
-  const h = harness({ env: { WEBHOOK_LEADS_URL: '' } });
+  const h = harness({ env: { WEBHOOK_LEADS_URL: '', WEBHOOK_SUPABASE_URL: '' } });
   await assert.rejects(h.submitLead(payload), /CRM did not confirm/);
   assert.equal(h.apiResponses[0].status, 503);
   assert.equal(h.webhookCalls.length, 0);
   assert.equal(h.pixelCalls.length, 0);
   assert.equal(h.metaCalls.length, 0);
+});
+
+test('EasyPanel with only the Supabase webhook saves the lead without requiring a Meta token', async () => {
+  const h = harness({ env: { WEBHOOK_LEADS_URL: undefined, META_ACCESS_TOKEN: undefined } });
+  await h.submitLead(payload);
+  assert.equal(h.apiResponses[0].status, 200);
+  assert.equal(h.apiResponses[0].body.crm_received, true);
+  assert.equal(h.apiResponses[0].body.meta_sent, false);
+  assert.equal(h.webhookCalls.length, 1);
+  assert.equal(h.webhookCalls[0].url, BACKUP_URL);
+  assert.equal(h.webhookCalls[0].payload.name, payload.nome_completo);
+  assert.equal(h.pixelCalls.length, 1);
+  assert.equal(h.metaCalls.length, 0);
+});
+
+test('Whitespace-only primary configuration falls back to the Supabase CRM and sends each event once', async () => {
+  const h = harness({ env: { WEBHOOK_LEADS_URL: '  ', WEBHOOK_SUPABASE_URL: ` ${BACKUP_URL} ` } });
+  await h.submitLead(payload);
+  assert.equal(h.webhookCalls.length, 1);
+  assert.equal(h.webhookCalls[0].url, BACKUP_URL);
+  assert.equal(h.pixelCalls.length, 1);
+  assert.equal(h.metaCalls.length, 1);
+  assert.equal(h.metaCalls[0].payload.data[0].event_id, h.pixelCalls[0][3].eventID);
+});
+
+test('Failure of the Supabase-only CRM blocks both pixel and CAPI', async () => {
+  for (const backup of [
+    () => Response.json({ success: false }),
+    () => Response.json({ error: 'CRM unavailable' }, { status: 500 }),
+  ]) {
+    const h = harness({ env: { WEBHOOK_LEADS_URL: undefined }, backup });
+    await assert.rejects(h.submitLead(payload), /CRM did not confirm/);
+    assert.equal(h.apiResponses[0].status, 502);
+    assert.equal(h.pixelCalls.length, 0);
+    assert.equal(h.metaCalls.length, 0);
+  }
 });
 
 test('A missing Meta token preserves the saved lead and browser pixel', async () => {
