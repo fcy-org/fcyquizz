@@ -3,6 +3,9 @@ import { sendMetaLead } from './meta-conversions';
 
 export const runtime = 'nodejs';
 
+const UMBRELLA_WEBHOOK_URL =
+  'https://crm-api.umbrellaecosystem.com.br/api/v1/webhooks/in/d800b8c1-550a-418a-b9da-beffa7f70273';
+
 async function postWebhook(url: string, name: string, payload: Record<string, string>) {
   try {
     const res = await fetch(url, {
@@ -31,14 +34,9 @@ async function postWebhook(url: string, name: string, payload: Record<string, st
 
 export async function POST(req: NextRequest) {
   try {
+    // CRM principal: Umbrella, a menos que WEBHOOK_LEADS_URL aponte para outro.
+    const webhookUrl = process.env.WEBHOOK_LEADS_URL?.trim() || UMBRELLA_WEBHOOK_URL;
     const supabaseWebhookUrl = process.env.WEBHOOK_SUPABASE_URL?.trim();
-    const webhookUrl = process.env.WEBHOOK_LEADS_URL?.trim() || supabaseWebhookUrl;
-    if (!webhookUrl) {
-      return NextResponse.json(
-        { success: false, crm_received: false, error: 'CRM is not configured' },
-        { status: 503 },
-      );
-    }
 
     const body = await req.json();
     if (typeof body.event_id !== 'string' || !body.event_id.trim()) {
@@ -92,11 +90,19 @@ export async function POST(req: NextRequest) {
       Object.entries(raw).filter(([, v]) => v.trim() !== '')
     );
 
-    const targets = [{ name: 'CRM', url: webhookUrl }];
+    // Mesmos nomes de campo usados pelo snippet de rastreamento do Umbrella.
+    const umbrellaPayload: Record<string, string> = { ...payload, browserEventId: body.event_id };
+    if (payload.url_pagina) umbrellaPayload.landingUrl = payload.url_pagina;
+    if (payload.fbc) umbrellaPayload._fbc = payload.fbc;
+    if (payload.fbp) umbrellaPayload._fbp = payload.fbp;
+    const payloadFor = (url: string) =>
+      url.startsWith('https://crm-api.umbrellaecosystem.com.br/') ? umbrellaPayload : payload;
+
+    const targets = [{ name: 'CRM', url: webhookUrl, payload: payloadFor(webhookUrl) }];
     if (supabaseWebhookUrl && supabaseWebhookUrl !== webhookUrl) {
-      targets.push({ name: 'Supabase', url: supabaseWebhookUrl });
+      targets.push({ name: 'Supabase', url: supabaseWebhookUrl, payload: payloadFor(supabaseWebhookUrl) });
     }
-    const [crmReceived] = await Promise.all(targets.map(t => postWebhook(t.url, t.name, payload)));
+    const [crmReceived] = await Promise.all(targets.map(t => postWebhook(t.url, t.name, t.payload)));
 
     if (!crmReceived) {
       return NextResponse.json(

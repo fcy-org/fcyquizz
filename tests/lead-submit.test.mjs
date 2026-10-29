@@ -9,6 +9,7 @@ import * as net from 'node:net';
 
 const CRM_URL = 'https://crm.example.test/leads';
 const BACKUP_URL = 'https://backup.example.test/leads';
+const UMBRELLA_URL = 'https://crm-api.umbrellaecosystem.com.br/api/v1/webhooks/in/d800b8c1-550a-418a-b9da-beffa7f70273';
 const payload = {
   event_id: 'test-lead-event',
   nome_completo: 'Test Lead',
@@ -47,7 +48,7 @@ function loadModule(relativePath, globals) {
   return compiledModule.exports;
 }
 
-function harness({ crm, backup, meta, apiResponse, pixel, missingPixel = false, env = {}, requestHeaders = {} } = {}) {
+function harness({ crm, backup, umbrella, meta, apiResponse, pixel, missingPixel = false, env = {}, requestHeaders = {} } = {}) {
   const pixelCalls = [];
   const webhookCalls = [];
   const apiResponses = [];
@@ -69,6 +70,7 @@ function harness({ crm, backup, meta, apiResponse, pixel, missingPixel = false, 
       webhookCalls.push({ url, payload: JSON.parse(options.body) });
       if (url === CRM_URL) return crm ? crm() : Response.json({ success: true });
       if (url === BACKUP_URL) return backup ? backup() : Response.json({ success: true });
+      if (url === UMBRELLA_URL) return umbrella ? umbrella() : Response.json({ success: true });
       throw new Error(`Unexpected request: ${url}`);
     },
   });
@@ -230,51 +232,6 @@ test('Meta rejection or network failure does not ask the user to resend a saved 
   }
 });
 
-test('Missing CRM configuration blocks both conversion channels and any webhook request', async () => {
-  const h = harness({ env: { WEBHOOK_LEADS_URL: '', WEBHOOK_SUPABASE_URL: '' } });
-  await assert.rejects(h.submitLead(payload), /CRM did not confirm/);
-  assert.equal(h.apiResponses[0].status, 503);
-  assert.equal(h.webhookCalls.length, 0);
-  assert.equal(h.pixelCalls.length, 0);
-  assert.equal(h.metaCalls.length, 0);
-});
-
-test('EasyPanel with only the Supabase webhook saves the lead without requiring a Meta token', async () => {
-  const h = harness({ env: { WEBHOOK_LEADS_URL: undefined, META_ACCESS_TOKEN: undefined } });
-  await h.submitLead(payload);
-  assert.equal(h.apiResponses[0].status, 200);
-  assert.equal(h.apiResponses[0].body.crm_received, true);
-  assert.equal(h.apiResponses[0].body.meta_sent, false);
-  assert.equal(h.webhookCalls.length, 1);
-  assert.equal(h.webhookCalls[0].url, BACKUP_URL);
-  assert.equal(h.webhookCalls[0].payload.name, payload.nome_completo);
-  assert.equal(h.pixelCalls.length, 1);
-  assert.equal(h.metaCalls.length, 0);
-});
-
-test('Whitespace-only primary configuration falls back to the Supabase CRM and sends each event once', async () => {
-  const h = harness({ env: { WEBHOOK_LEADS_URL: '  ', WEBHOOK_SUPABASE_URL: ` ${BACKUP_URL} ` } });
-  await h.submitLead(payload);
-  assert.equal(h.webhookCalls.length, 1);
-  assert.equal(h.webhookCalls[0].url, BACKUP_URL);
-  assert.equal(h.pixelCalls.length, 1);
-  assert.equal(h.metaCalls.length, 1);
-  assert.equal(h.metaCalls[0].payload.data[0].event_id, h.pixelCalls[0][3].eventID);
-});
-
-test('Failure of the Supabase-only CRM blocks both pixel and CAPI', async () => {
-  for (const backup of [
-    () => Response.json({ success: false }),
-    () => Response.json({ error: 'CRM unavailable' }, { status: 500 }),
-  ]) {
-    const h = harness({ env: { WEBHOOK_LEADS_URL: undefined }, backup });
-    await assert.rejects(h.submitLead(payload), /CRM did not confirm/);
-    assert.equal(h.apiResponses[0].status, 502);
-    assert.equal(h.pixelCalls.length, 0);
-    assert.equal(h.metaCalls.length, 0);
-  }
-});
-
 test('A missing Meta token preserves the saved lead and browser pixel', async () => {
   const h = harness({ env: { META_ACCESS_TOKEN: '' } });
   await h.submitLead(payload);
@@ -307,4 +264,50 @@ test('Meta test mode is optional and private credentials are never returned to t
   assert.equal(h.metaCalls[0].payload.access_token, 'test-meta-access-token');
   assert.ok(!JSON.stringify(h.apiResponses).includes('test-meta-access-token'));
   assert.ok(!JSON.stringify(h.apiResponses).includes('TEST_ONLY'));
+});
+
+test('Umbrella is the primary CRM when WEBHOOK_LEADS_URL is not set', async () => {
+  for (const leadsUrl of [undefined, '', '  ']) {
+    const h = harness({ env: { WEBHOOK_LEADS_URL: leadsUrl, WEBHOOK_SUPABASE_URL: undefined } });
+    await h.submitLead(payload);
+    assert.equal(h.apiResponses[0].status, 200);
+    assert.equal(h.webhookCalls.length, 1);
+    assert.equal(h.webhookCalls[0].url, UMBRELLA_URL);
+    assert.equal(h.pixelCalls.length, 1);
+    assert.equal(h.metaCalls.length, 1);
+  }
+});
+
+test('Umbrella receives the lead with its attribution fields', async () => {
+  const h = harness({ env: { WEBHOOK_LEADS_URL: UMBRELLA_URL } });
+  await h.submitLead(payload);
+  const call = h.webhookCalls.find(c => c.url === UMBRELLA_URL);
+  assert.equal(call.payload.name, payload.nome_completo);
+  assert.equal(call.payload.browserEventId, payload.event_id);
+  assert.equal(call.payload.landingUrl, payload.url_pagina);
+  const backupCall = h.webhookCalls.find(c => c.url === BACKUP_URL);
+  assert.equal(backupCall.payload.browserEventId, undefined);
+});
+
+test('Failure of the Umbrella CRM blocks both pixel and CAPI', async () => {
+  for (const umbrella of [
+    () => Response.json({ success: false }),
+    () => Response.json({ error: 'CRM unavailable' }, { status: 500 }),
+  ]) {
+    const h = harness({ env: { WEBHOOK_LEADS_URL: undefined }, umbrella });
+    await assert.rejects(h.submitLead(payload), /CRM did not confirm/);
+    assert.equal(h.apiResponses[0].status, 502);
+    assert.equal(h.pixelCalls.length, 0);
+    assert.equal(h.metaCalls.length, 0);
+  }
+});
+
+test('Secondary Supabase failure does not block the lead', async () => {
+  const h = harness({
+    env: { WEBHOOK_LEADS_URL: undefined },
+    backup: () => Response.json({ error: 'down' }, { status: 500 }),
+  });
+  await h.submitLead(payload);
+  assert.equal(h.apiResponses[0].status, 200);
+  assert.equal(h.pixelCalls.length, 1);
 });

@@ -61,6 +61,13 @@ export default function RootLayout({
           })(window,document,"clarity","script","${CLARITY_ID}");
         `}</Script>
 
+        {/* Umbrella CRM - rastreamento e atribuição */}
+        <Script
+          id="umbrella-crm"
+          src="https://crm-api.umbrellaecosystem.com.br/api/v1/public/t/d800b8c1-550a-418a-b9da-beffa7f70273.js"
+          strategy="afterInteractive"
+        />
+
         {/* Meta Pixel */}
         <Script id="meta-pixel" strategy="afterInteractive">{`
           !function(f,b,e,v,n,t,s){
