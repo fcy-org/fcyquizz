@@ -15,7 +15,7 @@ export default function Screen0Welcome({ onStart }: Props) {
         className="relative z-10 -mx-5 md:-mx-8 py-3 px-5 text-center text-xs md:text-sm font-bold tracking-wider"
         style={{ backgroundColor: '#B91C1C', color: '#FFFFFF' }}
       >
-        ÚLTIMAS VAGAS DISPONÍVEIS
+        EXCLUSIVO PARA DISTRIBUIDORAS/INDÚSTRIAS QUE FATURAM MAIS DE R$ 100.000,00
       </div>
       {/* Background elements */}
       <div
@@ -49,23 +49,25 @@ export default function Screen0Welcome({ onStart }: Props) {
             border: "1px solid rgba(197,255,77,0.25)",
           }}
         >
-          <Zap size={12} />
-          Agende sua consultoria gratuita
+          Agende a sua consultoria
         </div>
 
         <h1
           className="text-3xl font-bold leading-tight tracking-tight"
           style={{ color: "var(--color-text)" }}
         >
-          Descubra se sua empresa está pronta para criar um novo canal de vendas
+          O sistema que gerou mais de R$ 200 mil em receita nova para uma
+          distribuidora do Nordeste, sem depender de representantes. Veja se
+          ele se aplica ao seu negócio.
         </h1>
 
         <p
           className="text-base leading-relaxed max-w-sm"
           style={{ color: "var(--color-text-secondary)" }}
         >
-          Responda algumas perguntas sobre sua Distribuidora/Indústria para
-          agendar sua consultoria gratuita.
+          Sua distribuidora/indústria ainda depende da agenda dos
+          representantes para vender? Responda essas perguntas rápidas e
+          descubra como mudar isso.
         </p>
 
         {/* Features */}
