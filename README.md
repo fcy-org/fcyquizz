@@ -51,6 +51,7 @@ Na hospedagem, configure as mesmas variáveis do ambiente local:
 | `META_GRAPH_API_VERSION` | Versão da API Graph, atualmente `v26.0`. |
 | `META_TEST_EVENT_CODE` | Opcional, somente para validar eventos no painel de testes da Meta. |
 | `WEBHOOK_SUPABASE_URL` | CRM principal quando `WEBHOOK_LEADS_URL` não estiver configurada; destino secundário quando as duas URLs forem diferentes. |
+| `WEBHOOK_UMBRELLA_EXTRA_URL` | Opcional. Segundo webhook da Umbrella, que recebe todos os leads; falhas nele não bloqueiam o cadastro. |
 
 É necessário configurar pelo menos uma das URLs de webhook. A configuração existente do EasyPanel com apenas `WEBHOOK_SUPABASE_URL` é compatível. `META_ACCESS_TOKEN` ativa os eventos pelo servidor; sua ausência não bloqueia o cadastro no CRM nem o evento do pixel.
 

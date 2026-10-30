@@ -10,6 +10,7 @@ import * as net from 'node:net';
 const CRM_URL = 'https://crm.example.test/leads';
 const BACKUP_URL = 'https://backup.example.test/leads';
 const UMBRELLA_URL = 'https://crm-api.umbrellaecosystem.com.br/api/v1/webhooks/in/d800b8c1-550a-418a-b9da-beffa7f70273';
+const UMBRELLA_EXTRA_URL = 'https://crm-api.umbrellaecosystem.com.br/api/v1/webhooks/in/test-extra-webhook';
 const payload = {
   event_id: 'test-lead-event',
   nome_completo: 'Test Lead',
@@ -48,7 +49,7 @@ function loadModule(relativePath, globals) {
   return compiledModule.exports;
 }
 
-function harness({ crm, backup, umbrella, meta, apiResponse, pixel, missingPixel = false, env = {}, requestHeaders = {} } = {}) {
+function harness({ crm, backup, umbrella, umbrellaExtra, meta, apiResponse, pixel, missingPixel = false, env = {}, requestHeaders = {} } = {}) {
   const pixelCalls = [];
   const webhookCalls = [];
   const apiResponses = [];
@@ -57,6 +58,7 @@ function harness({ crm, backup, umbrella, meta, apiResponse, pixel, missingPixel
     process: { env: {
       WEBHOOK_LEADS_URL: CRM_URL,
       WEBHOOK_SUPABASE_URL: BACKUP_URL,
+      WEBHOOK_UMBRELLA_EXTRA_URL: UMBRELLA_EXTRA_URL,
       META_ACCESS_TOKEN: 'test-meta-access-token',
       NEXT_PUBLIC_META_PIXEL_ID: '123456789',
       META_GRAPH_API_VERSION: 'v26.0',
@@ -71,6 +73,7 @@ function harness({ crm, backup, umbrella, meta, apiResponse, pixel, missingPixel
       if (url === CRM_URL) return crm ? crm() : Response.json({ success: true });
       if (url === BACKUP_URL) return backup ? backup() : Response.json({ success: true });
       if (url === UMBRELLA_URL) return umbrella ? umbrella() : Response.json({ success: true });
+      if (url === UMBRELLA_EXTRA_URL) return umbrellaExtra ? umbrellaExtra() : Response.json({ success: true });
       throw new Error(`Unexpected request: ${url}`);
     },
   });
@@ -252,7 +255,7 @@ test('Missing event ID is rejected before CRM submission or tracking', async () 
 test('The same primary and secondary webhook URL receives the lead only once', async () => {
   const h = harness({ env: { WEBHOOK_SUPABASE_URL: CRM_URL } });
   await h.submitLead(payload);
-  assert.equal(h.webhookCalls.length, 1);
+  assert.equal(h.webhookCalls.filter(c => c.url === CRM_URL).length, 1);
   assert.equal(h.metaCalls.length, 1);
 });
 
@@ -271,8 +274,7 @@ test('Umbrella is the primary CRM when WEBHOOK_LEADS_URL is not set', async () =
     const h = harness({ env: { WEBHOOK_LEADS_URL: leadsUrl, WEBHOOK_SUPABASE_URL: undefined } });
     await h.submitLead(payload);
     assert.equal(h.apiResponses[0].status, 200);
-    assert.equal(h.webhookCalls.length, 1);
-    assert.equal(h.webhookCalls[0].url, UMBRELLA_URL);
+    assert.deepEqual(h.webhookCalls.map(c => c.url), [UMBRELLA_URL, UMBRELLA_EXTRA_URL]);
     assert.equal(h.pixelCalls.length, 1);
     assert.equal(h.metaCalls.length, 1);
   }
@@ -316,4 +318,27 @@ test('Webhooks receive the site Origin so Umbrella accepts the lead', async () =
   const h = harness({ env: { WEBHOOK_LEADS_URL: UMBRELLA_URL } });
   await h.submitLead(payload);
   assert.equal(h.webhookCalls[0].headers.Origin, 'https://quiz.example.test');
+});
+
+test('The second Umbrella webhook receives every lead with the Umbrella attribution fields', async () => {
+  const h = harness();
+  await h.submitLead(payload);
+  const call = h.webhookCalls.find(c => c.url === UMBRELLA_EXTRA_URL);
+  assert.equal(call.payload.name, payload.nome_completo);
+  assert.equal(call.payload.browserEventId, payload.event_id);
+  assert.equal(call.payload.landingUrl, payload.url_pagina);
+  assert.equal(call.headers.Origin, 'https://quiz.example.test');
+});
+
+test('Failure of the second Umbrella webhook does not block the lead', async () => {
+  for (const umbrellaExtra of [
+    () => Response.json({ success: false }),
+    () => { throw new Error('Umbrella unavailable'); },
+  ]) {
+    const h = harness({ umbrellaExtra });
+    await h.submitLead(payload);
+    assert.equal(h.apiResponses[0].status, 200);
+    assert.equal(h.pixelCalls.length, 1);
+    assert.equal(h.metaCalls.length, 1);
+  }
 });

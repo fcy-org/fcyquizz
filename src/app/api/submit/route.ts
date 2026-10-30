@@ -47,6 +47,8 @@ export async function POST(req: NextRequest) {
     // CRM principal: Umbrella, a menos que WEBHOOK_LEADS_URL aponte para outro.
     const webhookUrl = process.env.WEBHOOK_LEADS_URL?.trim() || UMBRELLA_WEBHOOK_URL;
     const supabaseWebhookUrl = process.env.WEBHOOK_SUPABASE_URL?.trim();
+    // Segundo webhook da Umbrella: recebe todos os leads; falhas aqui não bloqueiam o lead.
+    const umbrellaExtraWebhookUrl = process.env.WEBHOOK_UMBRELLA_EXTRA_URL?.trim();
 
     const body = await req.json();
     if (typeof body.event_id !== 'string' || !body.event_id.trim()) {
@@ -109,8 +111,12 @@ export async function POST(req: NextRequest) {
       url.startsWith('https://crm-api.umbrellaecosystem.com.br/') ? umbrellaPayload : payload;
 
     const targets = [{ name: 'CRM', url: webhookUrl, payload: payloadFor(webhookUrl) }];
-    if (supabaseWebhookUrl && supabaseWebhookUrl !== webhookUrl) {
-      targets.push({ name: 'Supabase', url: supabaseWebhookUrl, payload: payloadFor(supabaseWebhookUrl) });
+    const secondaryTargets = [
+      { name: 'Supabase', url: supabaseWebhookUrl },
+      { name: 'Umbrella (2º webhook)', url: umbrellaExtraWebhookUrl },
+    ];
+    for (const { name, url } of secondaryTargets) {
+      if (url && !targets.some(t => t.url === url)) targets.push({ name, url, payload: payloadFor(url) });
     }
     // A Umbrella só aceita envios de domínios liberados no painel, identificados pelo Origin.
     const origin = siteOrigin(req, payload.url_pagina);
