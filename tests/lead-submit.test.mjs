@@ -67,7 +67,7 @@ function harness({ crm, backup, umbrella, meta, apiResponse, pixel, missingPixel
         metaCalls.push({ url, payload: JSON.parse(options.body) });
         return meta ? meta() : Response.json({ events_received: 1 });
       }
-      webhookCalls.push({ url, payload: JSON.parse(options.body) });
+      webhookCalls.push({ url, payload: JSON.parse(options.body), headers: options.headers });
       if (url === CRM_URL) return crm ? crm() : Response.json({ success: true });
       if (url === BACKUP_URL) return backup ? backup() : Response.json({ success: true });
       if (url === UMBRELLA_URL) return umbrella ? umbrella() : Response.json({ success: true });
@@ -310,4 +310,10 @@ test('Secondary Supabase failure does not block the lead', async () => {
   await h.submitLead(payload);
   assert.equal(h.apiResponses[0].status, 200);
   assert.equal(h.pixelCalls.length, 1);
+});
+
+test('Webhooks receive the site Origin so Umbrella accepts the lead', async () => {
+  const h = harness({ env: { WEBHOOK_LEADS_URL: UMBRELLA_URL } });
+  await h.submitLead(payload);
+  assert.equal(h.webhookCalls[0].headers.Origin, 'https://quiz.example.test');
 });

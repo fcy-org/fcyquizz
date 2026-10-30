@@ -6,11 +6,11 @@ export const runtime = 'nodejs';
 const UMBRELLA_WEBHOOK_URL =
   'https://crm-api.umbrellaecosystem.com.br/api/v1/webhooks/in/d800b8c1-550a-418a-b9da-beffa7f70273';
 
-async function postWebhook(url: string, name: string, payload: Record<string, string>) {
+async function postWebhook(url: string, name: string, payload: Record<string, string>, origin?: string) {
   try {
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(origin ? { Origin: origin } : {}) },
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(15000),
     });
@@ -29,6 +29,16 @@ async function postWebhook(url: string, name: string, payload: Record<string, st
   } catch {
     console.error(`Webhook ${name} request failed.`);
     return false;
+  }
+}
+
+function siteOrigin(req: NextRequest, pageUrl?: string) {
+  const origin = req.headers.get('origin');
+  if (origin && origin !== 'null') return origin;
+  try {
+    return pageUrl ? new URL(pageUrl).origin : undefined;
+  } catch {
+    return undefined;
   }
 }
 
@@ -102,7 +112,9 @@ export async function POST(req: NextRequest) {
     if (supabaseWebhookUrl && supabaseWebhookUrl !== webhookUrl) {
       targets.push({ name: 'Supabase', url: supabaseWebhookUrl, payload: payloadFor(supabaseWebhookUrl) });
     }
-    const [crmReceived] = await Promise.all(targets.map(t => postWebhook(t.url, t.name, t.payload)));
+    // A Umbrella só aceita envios de domínios liberados no painel, identificados pelo Origin.
+    const origin = siteOrigin(req, payload.url_pagina);
+    const [crmReceived] = await Promise.all(targets.map(t => postWebhook(t.url, t.name, t.payload, origin)));
 
     if (!crmReceived) {
       return NextResponse.json(
