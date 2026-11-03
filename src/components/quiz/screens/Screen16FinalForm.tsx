@@ -42,16 +42,6 @@ const ESTADOS = [
   "TO",
 ];
 
-const ROLES = [
-  { value: "socio_dono", label: "Sócio / Dono" },
-  { value: "diretor", label: "Diretor" },
-  { value: "gerente_comercial", label: "Gerente comercial" },
-  { value: "gerente_marketing", label: "Gerente de marketing" },
-  { value: "coordenador_comercial", label: "Coordenador comercial" },
-  { value: "analista", label: "Analista" },
-  { value: "outro", label: "Outro" },
-];
-
 interface Props {
   answers: QuizAnswers;
   updateAnswers: (u: Partial<QuizAnswers>) => void;
@@ -67,8 +57,6 @@ interface Errors {
   email?: string;
   city?: string;
   state?: string;
-  role?: string;
-  roleOther?: string;
   consent?: string;
 }
 
@@ -93,9 +81,6 @@ export default function Screen16FinalForm({
       e.email = "Formato de e-mail inválido.";
     if (!answers.city.trim()) e.city = "Informe a cidade.";
     if (!answers.state) e.state = "Selecione o estado.";
-    if (!answers.role) e.role = "Selecione seu cargo.";
-    if (answers.role === "outro" && !answers.roleOther.trim())
-      e.roleOther = "Informe seu cargo.";
     if (!answers.privacyConsent) e.consent = "Aceite o termo para continuar.";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -232,67 +217,6 @@ export default function Screen16FinalForm({
           }}
           autoComplete="address-level2"
         />
-
-        {/* Role */}
-        <div className="w-full">
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: "var(--color-text-secondary)" }}
-          >
-            Cargo *
-          </label>
-          <select
-            value={answers.role}
-            onChange={(e) => {
-              updateAnswers({ role: e.target.value });
-              setErrors((p) => ({ ...p, role: undefined }));
-            }}
-            className="w-full rounded-xl px-4 py-4 text-base outline-none transition-all duration-200 appearance-none"
-            style={{
-              backgroundColor: "var(--color-surface-2)",
-              border: `1px solid ${field("role") ? "var(--color-error)" : "var(--color-border)"}`,
-              color: answers.role
-                ? "var(--color-text)"
-                : "var(--color-text-muted)",
-            }}
-          >
-            <option value="" disabled>
-              Selecione seu cargo
-            </option>
-            {ROLES.map((r) => (
-              <option
-                key={r.value}
-                value={r.value}
-                style={{ backgroundColor: "var(--color-surface-2)", color: "var(--color-text)" }}
-              >
-                {r.label}
-              </option>
-            ))}
-          </select>
-          {field("role") && (
-            <p
-              className="text-sm mt-1.5"
-              style={{ color: "var(--color-error)" }}
-            >
-              {field("role")}
-            </p>
-          )}
-        </div>
-
-        {/* Role other */}
-        {answers.role === "outro" && (
-          <QuizInput
-            label="Qual é o seu cargo? *"
-            placeholder="Ex: Coordenador de operações"
-            value={answers.roleOther}
-            error={field("roleOther")}
-            onChange={(e) => {
-              updateAnswers({ roleOther: e.target.value });
-              setErrors((p) => ({ ...p, roleOther: undefined }));
-            }}
-            autoFocus
-          />
-        )}
 
         {/* Consent */}
         <div className="flex flex-col gap-2 mt-2">

@@ -15,7 +15,7 @@ export default function Screen0Welcome({ onStart }: Props) {
         className="relative z-10 -mx-5 md:-mx-8 py-3 px-5 text-center text-xs md:text-sm font-bold tracking-wider"
         style={{ backgroundColor: '#B91C1C', color: '#FFFFFF' }}
       >
-        EXCLUSIVO PARA DISTRIBUIDORAS/INDÚSTRIAS QUE FATURAM MAIS DE R$ 100.000,00
+        EXCLUSIVO PARA DISTRIBUIDORAS/INDÚSTRIAS COM TIME DE VENDAS INTERNO
       </div>
       {/* Background elements */}
       <div
@@ -56,8 +56,8 @@ export default function Screen0Welcome({ onStart }: Props) {
           className="text-3xl font-bold leading-tight tracking-tight"
           style={{ color: "var(--color-text)" }}
         >
-          Implemente uma nova fonte de aquisição de clientes que não depende
-          de representante na sua distribuidora.
+          Tenha novos clientes na sua carteira em até 30 dias, sem depender de
+          representante comercial.
         </h1>
 
         <p
