@@ -56,8 +56,8 @@ export default function Screen0Welcome({ onStart }: Props) {
           className="text-3xl font-bold leading-tight tracking-tight"
           style={{ color: "var(--color-text)" }}
         >
-          Implemente uma nova fonte de aquisição de clientes que não depende
-          de representante na sua distribuidora.
+          Tenha novos clientes na sua carteira em até 30 dias, sem depender de
+          representante comercial.
         </h1>
 
         <p
