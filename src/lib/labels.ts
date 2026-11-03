@@ -3,7 +3,6 @@
 const OPERATION_TYPE: Record<string, string> = {
   distribuidora: 'Distribuidora',
   industria: 'Indústria',
-  atacado: 'Atacado',
   representacao: 'Representação comercial',
 };
 
@@ -26,11 +25,15 @@ const AUDIENCE: Record<string, string> = {
 };
 
 const REVENUE: Record<string, string> = {
-  up_100k: 'Até R$100 mil/mês',
-  '100k_300k': 'Entre R$100 mil e R$300 mil/mês',
-  '300k_700k': 'Entre R$300 mil e R$700 mil/mês',
-  '700k_1m': 'Entre R$700 mil e R$1 milhão/mês',
-  above_1m: 'Acima de R$1 milhão/mês',
+  starting: 'Estou iniciando agora',
+  up_50k: 'De 0 a R$ 50.000,00',
+  '50k_100k': 'De R$ 50.000,00 a R$ 100.000,00',
+  '100k_200k': 'De R$ 100.000,00 a R$ 200.000,00',
+  '200k_300k': 'De R$ 200.000,00 a R$ 300.000,00',
+  '300k_400k': 'De R$ 300.000,00 a R$ 400.000,00',
+  '400k_700k': 'De R$ 400.000,00 a R$ 700.000,00',
+  '700k_1m': 'De R$ 700.000,00 a R$ 1.000.000,00',
+  above_1m: 'Mais de R$ 1.000.000,00',
 };
 
 const WHATSAPP_USAGE: Record<string, string> = {

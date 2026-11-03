@@ -1,16 +1,11 @@
 'use client';
 
 import { type QuizAnswers } from '@/lib/types';
+import { REVENUE } from '@/lib/labels';
 import OptionCard from '../OptionCard';
 import QuizButton from '../QuizButton';
 
-const OPTIONS = [
-  { value: 'up_100k', label: 'Até R$100 mil/mês' },
-  { value: '100k_300k', label: 'Entre R$100 mil e R$300 mil/mês' },
-  { value: '300k_700k', label: 'Entre R$300 mil e R$700 mil/mês' },
-  { value: '700k_1m', label: 'Entre R$700 mil e R$1 milhão/mês' },
-  { value: 'above_1m', label: 'Acima de R$1 milhão/mês' },
-];
+const OPTIONS = Object.entries(REVENUE).map(([value, label]) => ({ value, label }));
 
 interface Props {
   answers: QuizAnswers;

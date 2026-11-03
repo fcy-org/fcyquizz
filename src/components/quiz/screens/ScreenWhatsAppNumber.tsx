@@ -55,6 +55,10 @@ export default function ScreenWhatsAppNumber({ answers, updateAnswers, next }: P
         onKeyDown={e => e.key === 'Enter' && handleNext()}
       />
 
+      <p className="-mt-5 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+        Vamos utilizar esse número para entrar em contato com você para agendar a consultoria
+      </p>
+
       <div className="mt-auto">
         <QuizButton onClick={handleNext} disabled={!answers.whatsapp.trim()}>
           Continuar

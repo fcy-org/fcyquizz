@@ -4,7 +4,7 @@ export function calculateScore(answers: QuizAnswers): number {
   let score = 0;
 
   // Step 2 - Operation type (ICP fit)
-  if (['distribuidora', 'industria', 'atacado'].includes(answers.operationType)) {
+  if (['distribuidora', 'industria'].includes(answers.operationType)) {
     score += 3;
   }
 
@@ -19,8 +19,10 @@ export function calculateScore(answers: QuizAnswers): number {
   switch (answers.revenue) {
     case 'above_1m': score += 5; break;
     case '700k_1m': score += 4; break;
-    case '300k_700k': score += 3; break;
-    case '100k_300k': score += 1; break;
+    case '400k_700k': score += 3; break;
+    case '300k_400k': score += 3; break;
+    case '200k_300k': score += 1; break;
+    case '100k_200k': score += 1; break;
   }
 
   // Step 7 - WhatsApp usage
@@ -84,7 +86,7 @@ export function calculateResult(answers: QuizAnswers): ResultType {
   const score = calculateScore(answers);
 
   // Also check hard ICP criteria
-  const isHighRevenue = ['300k_700k', '700k_1m', 'above_1m'].includes(answers.revenue);
+  const isHighRevenue = ['300k_400k', '400k_700k', '700k_1m', 'above_1m'].includes(answers.revenue);
   const isVeryHighRevenue = ['700k_1m', 'above_1m'].includes(answers.revenue);
   const usesWhatsApp = ['main_channel', 'uses_unorganized'].includes(answers.whatsappUsage);
   const hasTeam = !['only_1'].includes(answers.commercialSize);

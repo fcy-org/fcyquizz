@@ -56,18 +56,16 @@ export default function Screen0Welcome({ onStart }: Props) {
           className="text-3xl font-bold leading-tight tracking-tight"
           style={{ color: "var(--color-text)" }}
         >
-          O sistema que gerou mais de R$ 200 mil em receita nova para uma
-          distribuidora do Nordeste, sem depender de representantes. Veja se
-          ele se aplica ao seu negócio.
+          Implemente uma nova fonte de aquisição de clientes que não depende
+          de representante na sua distribuidora.
         </h1>
 
         <p
           className="text-base leading-relaxed max-w-sm"
           style={{ color: "var(--color-text-secondary)" }}
         >
-          Sua distribuidora/indústria ainda depende da agenda dos
-          representantes para vender? Responda essas perguntas rápidas e
-          descubra como mudar isso.
+          Responda essas perguntas rápidas para receber uma consultoria
+          gratuita com nosso time
         </p>
 
         {/* Features */}

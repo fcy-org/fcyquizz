@@ -9,7 +9,6 @@ import QuizButton from '../QuizButton';
 const OPTIONS = [
   { value: 'distribuidora', label: 'Distribuidora' },
   { value: 'industria', label: 'Indústria' },
-  { value: 'atacado', label: 'Atacado' },
   { value: 'representacao', label: 'Representação comercial' },
   { value: 'outro', label: 'Outro modelo de negócio' },
 ];
