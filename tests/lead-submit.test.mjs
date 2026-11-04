@@ -9,7 +9,7 @@ import * as net from 'node:net';
 
 const CRM_URL = 'https://crm.example.test/leads';
 const BACKUP_URL = 'https://backup.example.test/leads';
-const UMBRELLA_URL = 'https://crm-api.umbrellaecosystem.com.br/api/v1/webhooks/in/d800b8c1-550a-418a-b9da-beffa7f70273';
+const UMBRELLA_URL = 'https://crm-api.umbrellaecosystem.com.br/api/v1/webhooks/in/1653db98-8aee-484d-9985-1cd7c9a6818d';
 const UMBRELLA_EXTRA_URL = 'https://crm-api.umbrellaecosystem.com.br/api/v1/webhooks/in/test-extra-webhook';
 const payload = {
   event_id: 'test-lead-event',
