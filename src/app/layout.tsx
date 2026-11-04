@@ -64,7 +64,7 @@ export default function RootLayout({
         {/* Umbrella CRM - rastreamento e atribuição */}
         <Script
           id="umbrella-crm"
-          src="https://crm-api.umbrellaecosystem.com.br/api/v1/public/t/d800b8c1-550a-418a-b9da-beffa7f70273.js"
+          src="https://crm-api.umbrellaecosystem.com.br/api/v1/public/t/1653db98-8aee-484d-9985-1cd7c9a6818d.js"
           strategy="afterInteractive"
         />
 
