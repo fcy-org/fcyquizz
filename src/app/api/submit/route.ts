@@ -6,6 +6,10 @@ export const runtime = 'nodejs';
 const UMBRELLA_WEBHOOK_URL =
   'https://crm-api.umbrellaecosystem.com.br/api/v1/webhooks/in/1653db98-8aee-484d-9985-1cd7c9a6818d';
 
+// Planilha Google que espelha os leads da Fonil; recebe o mesmo corpo enviado à Umbrella.
+const SHEET_WEBHOOK_URL =
+  'https://script.google.com/macros/s/AKfycbzhbtWJlzQDEH6U9uPRJpCtcyUhahPJbv6QNtR_EW0dKRKxAXWlEMqP0oEX8p7fWwvfvg/exec';
+
 async function postWebhook(url: string, name: string, payload: Record<string, string>, origin?: string) {
   try {
     const res = await fetch(url, {
@@ -108,12 +112,13 @@ export async function POST(req: NextRequest) {
     if (payload.fbc) umbrellaPayload._fbc = payload.fbc;
     if (payload.fbp) umbrellaPayload._fbp = payload.fbp;
     const payloadFor = (url: string) =>
-      url.startsWith('https://crm-api.umbrellaecosystem.com.br/') ? umbrellaPayload : payload;
+      url.startsWith('https://crm-api.umbrellaecosystem.com.br/') || url === SHEET_WEBHOOK_URL ? umbrellaPayload : payload;
 
     const targets = [{ name: 'CRM', url: webhookUrl, payload: payloadFor(webhookUrl) }];
     const secondaryTargets = [
       { name: 'Supabase', url: supabaseWebhookUrl },
       { name: 'Umbrella (2º webhook)', url: umbrellaExtraWebhookUrl },
+      { name: 'Planilha', url: SHEET_WEBHOOK_URL },
     ];
     for (const { name, url } of secondaryTargets) {
       if (url && !targets.some(t => t.url === url)) targets.push({ name, url, payload: payloadFor(url) });

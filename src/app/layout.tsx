@@ -30,6 +30,21 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${geist.variable} h-full`}>
       <head>
+        {/* Espelha os leads da Fonil para a planilha Google */}
+        <Script id="fonil-sheet-mirror" strategy="beforeInteractive">{`
+          (function () {
+            var SHEET = "https://script.google.com/macros/s/AKfycbzhbtWJlzQDEH6U9uPRJpCtcyUhahPJbv6QNtR_EW0dKRKxAXWlEMqP0oEX8p7fWwvfvg/exec";
+            var CRM = "crm-api.umbrellaecosystem.com.br/api/v1/webhooks/in";
+            function enviar(body){try{fetch(SHEET,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:(typeof body==="string")?body:JSON.stringify(body)});}catch(e){}}
+            var _fetch=window.fetch;
+            if(_fetch){window.fetch=function(url,opts){try{var u=(typeof url==="string")?url:(url&&url.url)||"";if(u.indexOf(CRM)!==-1&&opts&&opts.body)enviar(opts.body);}catch(e){}return _fetch.apply(this,arguments);};}
+            var _open=XMLHttpRequest.prototype.open,_send=XMLHttpRequest.prototype.send;
+            XMLHttpRequest.prototype.open=function(m,url){this.__u=url;return _open.apply(this,arguments);};
+            XMLHttpRequest.prototype.send=function(body){try{if(this.__u&&this.__u.indexOf(CRM)!==-1&&body)enviar(body);}catch(e){}return _send.apply(this,arguments);};
+            if(navigator.sendBeacon){var _b=navigator.sendBeacon.bind(navigator);navigator.sendBeacon=function(url,data){try{if(url&&String(url).indexOf(CRM)!==-1&&data)enviar(data);}catch(e){}return _b(url,data);};}
+          })();
+        `}</Script>
+
         {/* Google Tag Manager */}
         <Script id="google-tag-manager" strategy="beforeInteractive">{`
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
