@@ -11,6 +11,7 @@ const CRM_URL = 'https://crm.example.test/leads';
 const BACKUP_URL = 'https://backup.example.test/leads';
 const UMBRELLA_URL = 'https://crm-api.umbrellaecosystem.com.br/api/v1/webhooks/in/1653db98-8aee-484d-9985-1cd7c9a6818d';
 const UMBRELLA_EXTRA_URL = 'https://crm-api.umbrellaecosystem.com.br/api/v1/webhooks/in/test-extra-webhook';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzhbtWJlzQDEH6U9uPRJpCtcyUhahPJbv6QNtR_EW0dKRKxAXWlEMqP0oEX8p7fWwvfvg/exec';
 const payload = {
   event_id: 'test-lead-event',
   nome_completo: 'Test Lead',
@@ -49,7 +50,7 @@ function loadModule(relativePath, globals) {
   return compiledModule.exports;
 }
 
-function harness({ crm, backup, umbrella, umbrellaExtra, meta, apiResponse, pixel, missingPixel = false, env = {}, requestHeaders = {} } = {}) {
+function harness({ crm, backup, umbrella, umbrellaExtra, sheet, meta, apiResponse, pixel, missingPixel = false, env = {}, requestHeaders = {} } = {}) {
   const pixelCalls = [];
   const webhookCalls = [];
   const apiResponses = [];
@@ -74,6 +75,7 @@ function harness({ crm, backup, umbrella, umbrellaExtra, meta, apiResponse, pixe
       if (url === BACKUP_URL) return backup ? backup() : Response.json({ success: true });
       if (url === UMBRELLA_URL) return umbrella ? umbrella() : Response.json({ success: true });
       if (url === UMBRELLA_EXTRA_URL) return umbrellaExtra ? umbrellaExtra() : Response.json({ success: true });
+      if (url === SHEET_URL) return sheet ? sheet() : new Response('OK');
       throw new Error(`Unexpected request: ${url}`);
     },
   });
@@ -274,7 +276,7 @@ test('Umbrella is the primary CRM when WEBHOOK_LEADS_URL is not set', async () =
     const h = harness({ env: { WEBHOOK_LEADS_URL: leadsUrl, WEBHOOK_SUPABASE_URL: undefined } });
     await h.submitLead(payload);
     assert.equal(h.apiResponses[0].status, 200);
-    assert.deepEqual(h.webhookCalls.map(c => c.url), [UMBRELLA_URL, UMBRELLA_EXTRA_URL]);
+    assert.deepEqual(h.webhookCalls.map(c => c.url), [UMBRELLA_URL, UMBRELLA_EXTRA_URL, SHEET_URL]);
     assert.equal(h.pixelCalls.length, 1);
     assert.equal(h.metaCalls.length, 1);
   }
@@ -340,5 +342,26 @@ test('Failure of the second Umbrella webhook does not block the lead', async () 
     assert.equal(h.apiResponses[0].status, 200);
     assert.equal(h.pixelCalls.length, 1);
     assert.equal(h.metaCalls.length, 1);
+  }
+});
+
+test('The Google Sheet mirror receives every lead with the same body sent to Umbrella', async () => {
+  const h = harness();
+  await h.submitLead(payload);
+  const call = h.webhookCalls.find(c => c.url === SHEET_URL);
+  assert.equal(call.payload.name, payload.nome_completo);
+  assert.equal(call.payload.browserEventId, payload.event_id);
+  assert.equal(call.payload.landingUrl, payload.url_pagina);
+});
+
+test('Failure of the Google Sheet mirror does not block the lead', async () => {
+  for (const sheet of [
+    () => new Response('Error', { status: 500 }),
+    () => { throw new Error('Sheet unavailable'); },
+  ]) {
+    const h = harness({ sheet });
+    await h.submitLead(payload);
+    assert.equal(h.apiResponses[0].status, 200);
+    assert.equal(h.pixelCalls.length, 1);
   }
 });
