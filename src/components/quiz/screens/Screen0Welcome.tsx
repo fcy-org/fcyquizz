@@ -2,20 +2,34 @@
 
 import QuizButton from "../QuizButton";
 import Logo from "../Logo";
-import { TrendingUp, BarChart3, Zap } from "lucide-react";
+import { ORIGINAL_COPY, type WelcomeCopy } from "@/lib/welcome-variants";
 
 interface Props {
   onStart: () => void;
+  copy?: WelcomeCopy;
 }
 
-export default function Screen0Welcome({ onStart }: Props) {
+export default function Screen0Welcome({ onStart, copy = ORIGINAL_COPY }: Props) {
+  // Headlines longas ficam um pouco menores para não empurrar o CTA para fora da tela.
+  const longHeadline = copy.headline.length > 150;
   return (
     <div className="flex flex-col flex-1 pb-8 px-5 md:px-8 relative overflow-hidden min-h-svh lg:min-h-0">
       <div
         className="relative z-10 -mx-5 md:-mx-8 py-3 px-5 text-center text-xs md:text-sm font-bold tracking-wider"
         style={{ backgroundColor: '#B91C1C', color: '#FFFFFF' }}
       >
-        EXCLUSIVO PARA DISTRIBUIDORAS/INDÚSTRIAS QUE FATURAM MAIS DE R$ 100.000,00
+        {copy.strip}
+        {copy.stripHighlight && (
+          <>
+            {" "}
+            <span
+              className="inline-block px-1.5 rounded-sm"
+              style={{ backgroundColor: "#FFFFFF", color: "#B91C1C" }}
+            >
+              {copy.stripHighlight}
+            </span>
+          </>
+        )}
       </div>
       {/* Background elements */}
       <div
@@ -49,35 +63,26 @@ export default function Screen0Welcome({ onStart }: Props) {
             border: "1px solid rgba(197,255,77,0.25)",
           }}
         >
-          Agende a sua consultoria
+          {copy.badge}
         </div>
 
         <h1
-          className="text-3xl font-bold leading-tight tracking-tight"
+          className={`${longHeadline ? "text-2xl md:text-3xl" : "text-3xl"} font-bold leading-tight tracking-tight`}
           style={{ color: "var(--color-text)" }}
         >
-          Implemente uma nova fonte de aquisição de clientes que não depende
-          de representante na sua distribuidora.
+          {copy.headline}
         </h1>
 
         <p
-          className="text-base leading-relaxed max-w-sm"
+          className={`text-base leading-relaxed ${copy.subheadline.length > 120 ? "max-w-lg" : "max-w-sm"}`}
           style={{ color: "var(--color-text-secondary)" }}
         >
-          Responda essas perguntas rápidas para receber uma consultoria
-          gratuita com nosso time
+          {copy.subheadline}
         </p>
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full max-w-xs md:max-w-none">
-          {[
-            { icon: BarChart3, label: "Análise da estrutura comercial" },
-            {
-              icon: TrendingUp,
-              label: "Mapeamento do potencial de crescimento",
-            },
-            { icon: Zap, label: "Consultoria gratuita para sua empresa" },
-          ].map(({ icon: Icon, label }) => (
+          {copy.bullets.map(({ icon: Icon, label }) => (
             <div
               key={label}
               className="flex items-center gap-3 px-4 py-3 rounded-xl"
@@ -105,12 +110,12 @@ export default function Screen0Welcome({ onStart }: Props) {
 
       {/* CTA */}
       <div className="pt-6">
-        <QuizButton onClick={onStart}>Iniciar cadastro</QuizButton>
+        <QuizButton onClick={onStart}>{copy.cta}</QuizButton>
         <p
           className="text-center text-xs mt-3"
           style={{ color: "var(--color-text-muted)" }}
         >
-          Consultoria gratuita · Para distribuidoras e indústrias
+          {copy.footer}
         </p>
       </div>
     </div>

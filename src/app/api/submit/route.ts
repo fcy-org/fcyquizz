@@ -99,6 +99,7 @@ export async function POST(req: NextRequest) {
       fbp:                      body.fbp                    ?? '',
       url_pagina:               body.url_pagina             ?? '',
       dispositivo:              body.dispositivo            ?? '',
+      variante_quiz:            body.variante_quiz          ?? '',
     };
 
     // Remove campos vazios antes de enviar
