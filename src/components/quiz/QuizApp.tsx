@@ -6,6 +6,7 @@ import { type QuizAnswers, type QuizState, INITIAL_ANSWERS } from '@/lib/types';
 import { calculateResult, getQualificationLevel } from '@/lib/scoring';
 import { getUTMParams, generateEventId } from '@/lib/utils';
 import { submitLead } from '@/lib/lead-submit';
+import { WELCOME_VARIANTS, type WelcomeVariant } from '@/lib/welcome-variants';
 import { label, OPERATION_TYPE, SEGMENT, AUDIENCE, REVENUE, WHATSAPP_USAGE, COMMERCIAL_SIZE, CLIENT_SOURCE, MARKETING, TRACK_SALES, REPURCHASE, CAPACITY, OBJECTIVE, RESULT, ROLE } from '@/lib/labels';
 
 import ProgressBar from './ProgressBar';
@@ -28,7 +29,8 @@ import Screen16Result from './screens/Screen18Result';
 // Steps: 0=welcome, 1=name, 2=phone, 3=role, 4-9=questions/info, 10=social proof break, 11=form, 12=processing, 13=result
 const PROGRESS_STEPS = [1, 2, 3, 4, 5, 6, 8, 9, 11];
 
-export default function QuizApp() {
+export default function QuizApp({ variant = 'original' }: { variant?: WelcomeVariant }) {
+  const copy = WELCOME_VARIANTS[variant];
   const [state, setState] = useState<QuizState>(() => ({
     currentStep: 0,
     answers: INITIAL_ANSWERS,
@@ -98,6 +100,7 @@ export default function QuizApp() {
       resultado_diagnostico: label(RESULT, result),
       nivel_qualificacao: qualification,
       // Meta e rastreamento
+      variante_quiz: copy.id,
       event_id: generateEventId(),
       ...state.utmParams,
       ...getUTMParams(),
@@ -119,7 +122,7 @@ export default function QuizApp() {
       submitInFlight.current = false;
       setState(prev => ({ ...prev, isSubmitting: false }));
     }
-  }, [state.answers, state.utmParams, goTo]);
+  }, [state.answers, state.utmParams, goTo, copy.id]);
 
   // Progress bar calculation
   const showProgress = state.currentStep >= 1 && state.currentStep <= 11;
@@ -140,7 +143,7 @@ export default function QuizApp() {
   const renderScreen = () => {
     const props = { answers: state.answers, updateAnswers, next, back };
     switch (state.currentStep) {
-      case 0: return <Screen0Welcome onStart={next} />;
+      case 0: return <Screen0Welcome onStart={next} copy={copy} />;
       case 1: return <Screen1Name {...props} />;
       case 2: return <ScreenWhatsAppNumber {...props} />;
       case 3: return <ScreenRole {...props} />;
